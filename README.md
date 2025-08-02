@@ -10,7 +10,7 @@
 
 - `\bot` 模型对话功能:会将消息转发给模型,接收到模型的返回后输入并发送
 
-![\\bot_1](./WechatBot.Example/bot_1.png)
+![\\bot_1](https://github.com/gz4nna/WeChatBot/blob/master/WeChatBot.Example/bot_1.png?raw=true)
 
 目前就这一个,其他指令还没写🤭可以先稍微将就着玩一阵子🙏
 
