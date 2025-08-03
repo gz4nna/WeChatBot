@@ -51,4 +51,5 @@ var messageContent = lastMessage.Name;
 
 ## 注意事项
 
-需要有 .NET 8 运行时
+- 需要有 .NET 8 运行时
+- 运行期间请不要使用中文输入法,否则输出的英文内容将变成你输入法中的备选词
