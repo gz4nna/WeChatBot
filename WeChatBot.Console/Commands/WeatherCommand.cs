@@ -7,8 +7,8 @@ public static partial class Command
     /// </summary>
     /// <param name="commandText"></param>
     /// <returns></returns>
-    public static async Task<string?> HandleWeatherCommand(string commandText)
+    public static Task<string?> HandleWeatherCommand(string commandText)
     {
-        return "雨下整夜~我的爱溢出就像雨水~";
+        return Task.FromResult<string?>("雨下整夜~我的爱溢出就像雨水~");
     }
 }

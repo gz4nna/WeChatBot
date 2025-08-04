@@ -17,7 +17,7 @@ public partial class Program
         // 注册所有命令处理器
         CommandHandlers.Add("\\help", Command.HandleHelpCommand);
         CommandHandlers.Add("\\bot", Command.HandleBotCommand);
-        CommandHandlers.Add("\\weather", Command.HandleWeatherCommand);
+        // CommandHandlers.Add("\\weather", Command.HandleWeatherCommand);
         CommandHandlers.Add("\\picture", Command.HandlePictureCommand);
     }
 
@@ -39,11 +39,11 @@ public partial class Program
             System.Console.WriteLine("\n----------- 检测到新消息！-----------");
 
             // 获取所有消息并处理最新的一个
-            var currentMessages = _contentAreaPane.FindAllChildren(_conditionFactory.ByControlType(FlaUI.Core.Definitions.ControlType.ListItem)).ToList();
-            if (currentMessages.Count == 0) return;
+            var currentMessages = _contentAreaPane?.FindAllChildren(condition: _conditionFactory.ByControlType(FlaUI.Core.Definitions.ControlType.ListItem)).ToList();
+            if (currentMessages?.Count == 0) return;
 
             // 获取最新消息
-            var lastMessage = currentMessages.Last();
+            var lastMessage = currentMessages?.Last();
 
             System.Console.WriteLine("--- 最新消息的结构 ---");
             UIHelper.PrintElementTree(lastMessage, 0);

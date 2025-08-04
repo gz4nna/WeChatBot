@@ -9,15 +9,15 @@ public static partial class Command
     /// </summary>
     /// <param name="commandText"></param>
     /// <returns></returns>
-    public static async Task<string?> HandleHelpCommand(string commandText)
+    public static Task<string?> HandleHelpCommand(string commandText)
     {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.AppendLine("[自动回复]:");
         stringBuilder.AppendLine("欢迎使用 WeChatBot！以下是可用的命令列表：");
         stringBuilder.AppendLine("1. \\bot <内容> - 发送内容到大语言模型并获取回复。");
-        stringBuilder.AppendLine("2. \\weather <城市> - 获取当地天气信息。(未实装)");
-        stringBuilder.AppendLine("3. \\picture - 发送图库中随机图片到聊天。");
+        //stringBuilder.AppendLine("2. \\weather <城市> - 获取当地天气信息。(未实装)");
+        stringBuilder.AppendLine("2. \\picture - 发送图库中随机图片到聊天。");
 
-        return stringBuilder.ToString();
+        return Task.FromResult<string?>(stringBuilder.ToString());
     }
 }
