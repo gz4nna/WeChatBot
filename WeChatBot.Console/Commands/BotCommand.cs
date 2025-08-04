@@ -16,6 +16,8 @@ public static partial class Command
     /// <summary>
     /// 处理 \bot 命令
     /// </summary>
+    /// <param name="commandText"></param>
+    /// <returns></returns>
     public static async Task<string?> HandleBotCommand(string commandText)
     {
         try
