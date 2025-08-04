@@ -1,14 +1,14 @@
 {
   "main": {
-    "id": "8fbfe224220633d1",
+    "id": "8ae045eaba133268",
     "type": "split",
     "children": [
       {
-        "id": "b6f731d0f9e6aac1",
+        "id": "15c542b05d1b152e",
         "type": "tabs",
         "children": [
           {
-            "id": "67e95133d30fca46",
+            "id": "e299d76636684507",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -27,15 +27,15 @@
     "direction": "vertical"
   },
   "left": {
-    "id": "48f54a8f8f4ed33f",
+    "id": "3f2078b4af8f82cf",
     "type": "split",
     "children": [
       {
-        "id": "c7294f733a48e62f",
+        "id": "c2f16d3fd1c0399f",
         "type": "tabs",
         "children": [
           {
-            "id": "b13273279c5196ad",
+            "id": "adc4eadac0faa6a0",
             "type": "leaf",
             "state": {
               "type": "file-explorer",
@@ -48,7 +48,7 @@
             }
           },
           {
-            "id": "4488dade1182220a",
+            "id": "190fefb6b2c83ce9",
             "type": "leaf",
             "state": {
               "type": "search",
@@ -65,7 +65,7 @@
             }
           },
           {
-            "id": "2dcca2813f9041dd",
+            "id": "95c3cc66d6e06aa0",
             "type": "leaf",
             "state": {
               "type": "bookmarks",
@@ -81,15 +81,15 @@
     "width": 300
   },
   "right": {
-    "id": "01f4459721e55944",
+    "id": "2a0fe5225e6ce1d6",
     "type": "split",
     "children": [
       {
-        "id": "3a7aab692d17d31b",
+        "id": "d2d7d472491707cc",
         "type": "tabs",
         "children": [
           {
-            "id": "e142b51c66a1bc82",
+            "id": "7bd52f68eacf91bc",
             "type": "leaf",
             "state": {
               "type": "backlink",
@@ -108,7 +108,7 @@
             }
           },
           {
-            "id": "4e9ab43d258f196f",
+            "id": "c31edb059ec3c906",
             "type": "leaf",
             "state": {
               "type": "outgoing-link",
@@ -122,7 +122,7 @@
             }
           },
           {
-            "id": "857b74c37527486c",
+            "id": "e04cfca310e636d0",
             "type": "leaf",
             "state": {
               "type": "tag",
@@ -137,7 +137,7 @@
             }
           },
           {
-            "id": "7d7c5755b2f40c97",
+            "id": "950706eb669611ea",
             "type": "leaf",
             "state": {
               "type": "outline",
@@ -168,19 +168,18 @@
       "command-palette:開啟命令面板": false
     }
   },
-  "active": "b13273279c5196ad",
+  "active": "e299d76636684507",
   "lastOpenFiles": [
-    "WeChatBot.Console/up54arb5.nj5~",
-    "WeChatBot.Console/etl05yg3.5t4~",
-    "WeChatBot.Console/dgk2e5pr.zcy~",
-    "WeChatBot.Console/kfjpyxml.1hf~",
-    "WeChatBot.Console/Commands/mwqvkprk.ny1~",
-    "WeChatBot.Console/Commands/34mvzrnz.kd4~",
-    "WeChatBot.Console/Commands/PictureCommand.cs",
-    "WeChatBot.Console/yog2dxyp.yph~",
-    "WeChatBot.Console/eksg5efi.5bi~",
-    "WeChatBot.Console/s0lfq30t.sye~",
-    "WeChatBot.Console/Commands/HelpCommand.cs",
     "WeChatBot.Example/bot_1.png",
+    "README.md",
+    "WeChatBot.Console/Commands/atexooa2.nji~",
+    "WeChatBot.Example/help_1.png",
+    "WeChatBot.Example/picture_1.png",
+    "WeChatBot.Console/pjew3tbb.4fi~",
+    "WeChatBot.Console/11araxmq.msp~",
+    "WeChatBot.Console/1o13p35j.xbi~",
+    "WeChatBot.Console/Commands/0qhtajmv.pt0~",
+    "WeChatBot.Console/Commands/sd4p0p14.5ry~",
+    "WeChatBot.Console/cqu5mhad.bzy~"
   ]
 }
