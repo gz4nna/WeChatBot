@@ -3,10 +3,17 @@ using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Conditions;
 using FlaUI.UIA3;
 
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+using WeChatBot.Models.Settings;
+
 namespace WeChatBot.Console;
 
 public partial class Program
 {
+    private static IConfiguration? _configuration;
+    private static IServiceProvider? _serviceProvider;
     /// <summary>
     /// 计时器，用于防抖处理
     /// </summary>
@@ -21,6 +28,9 @@ public partial class Program
 
     static async Task Main(string[] _)
     {
+        // 配置依赖注入
+        ConfigureServices();
+
         System.Console.WriteLine("正在查找微信进程...");
 
         // 按照进程名获取微信进程
@@ -99,9 +109,15 @@ public partial class Program
             // 初始化命令处理器
             InitializeCommandHandlers();
 
+            // 所有初始化完成后，输出提示信息
+            await SendResponseToWeChatAsync("WeChatBot已启动,现在可以进行对话,输入 \\help 获取使用帮助~");
+
             System.Console.WriteLine("事件监听已启动。程序将保持运行以接收新消息。按 Enter 键退出。");
 
             await Task.Run(() => System.Console.ReadLine());
+
+            // 退出前也输出提示信息
+            await SendResponseToWeChatAsync("WeChatBot已关闭,希望帮助到了你~");
 
             _debounceTimer?.Dispose();
         }
@@ -157,5 +173,44 @@ public partial class Program
             .AsTextBox();
 
         return _contentAreaPane != null && _inputEdit != null;
+    }
+
+    private static void ConfigureServices()
+    {
+        // 如果不存在 appsettings.json,创建一个并将默认配置写入
+        if (!File.Exists("appsettings.json"))
+        {
+            var defaultConfig = new BotSettings();
+            File.WriteAllText("appsettings.json", System.Text.Json.JsonSerializer.Serialize(defaultConfig, new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+        }
+
+        // 创建配置
+        _configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .Build();
+
+        // 创建服务集合
+        var services = new ServiceCollection();
+
+        // 注册配置
+        services.AddSingleton(_configuration);
+
+        // 绑定并注册BotSettings
+        var botSettings = new BotSettings();
+        _configuration.GetSection("BotSettings").Bind(botSettings);
+        services.AddSingleton(botSettings);
+
+        // 创建服务提供者
+        _serviceProvider = services.BuildServiceProvider();
+
+        // 拿来自己用
+        _settings = _serviceProvider.GetRequiredService<BotSettings>();
+    }
+
+    // 获取服务的辅助方法
+    public static T GetService<T>() where T : class
+    {
+        return _serviceProvider!.GetRequiredService<T>();
     }
 }

@@ -8,14 +8,14 @@ public static partial class Command
     /// <summary>
     /// 处理 \picture 命令，发送图片到聊天
     /// </summary>
-    public static Task<string?> HandlePictureCommand(string commandText)
+    public static Task<string?> HandlePictureCommand(string _)
     {
         try
         {
-            System.Console.WriteLine($"处理Picture命令，参数: \"{commandText}\"");
+            System.Console.WriteLine($"处理Picture命令");
 
             // 默认图片文件夹
-            string imageFolder = "";
+            string imageFolder = _settings.CommandParams.PictureParams.DefaultImagePath;
 
             // 验证文件夹是否存在
             if (!Directory.Exists(imageFolder))

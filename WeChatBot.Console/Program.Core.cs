@@ -1,5 +1,6 @@
 ﻿using WeChatBot.Console.Commands;
 using WeChatBot.Console.Helpers;
+using WeChatBot.Models.Settings;
 
 namespace WeChatBot.Console;
 
@@ -8,6 +9,7 @@ public partial class Program
     // 命令前缀和处理器映射字典
     private static readonly Dictionary<string, Func<string, Task<string?>>> commandHandlers = new();
     private static readonly SemaphoreSlim _processingLock = new(1, 1);
+    private static BotSettings? _settings;
 
     /// <summary>
     /// 初始化命令处理器
@@ -15,10 +17,10 @@ public partial class Program
     private static void InitializeCommandHandlers()
     {
         // 注册所有命令处理器
-        commandHandlers.Add("\\help", Command.HandleHelpCommand);
-        commandHandlers.Add("\\bot", Command.HandleBotCommand);
-        // commandHandlers.Add("\\weather", Command.HandleWeatherCommand);
-        commandHandlers.Add("\\picture", Command.HandlePictureCommand);
+        commandHandlers.Add(_settings.CommandPrefixes.Help, Command.HandleHelpCommand);
+        commandHandlers.Add(_settings.CommandPrefixes.Chat, Command.HandleChatCommand);
+        commandHandlers.Add(_settings.CommandPrefixes.Picture, Command.HandlePictureCommand);
+        commandHandlers.Add(_settings.CommandPrefixes.Info, Command.HandleInfoCommand);
     }
 
     /// <summary>
@@ -78,7 +80,7 @@ public partial class Program
 
                 System.Console.WriteLine("不需要处理\n");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // 无论什么消息都有一个子元素,三个孙元素
                 var specialMessage = lastMessage?.FindFirstChild();
@@ -94,7 +96,8 @@ public partial class Program
                 if (firstChild == null && secondChild == null && thirdChild == null)
                 {
                     System.Console.WriteLine("检测到撤回消息");
-                    await SendResponseToWeChatAsync("[自动回复]大胆!撤回了什么,让我看看");
+                    await SendResponseToWeChatAsync(_settings.AutoReplyMessages.RecallMessage);
+
                     return;
                 }
 
@@ -147,7 +150,7 @@ public partial class Program
 
                     // 发送回复时使用更长的延迟
                     await Task.Delay(2000); // 增加到2秒
-                    await SendResponseToWeChatAsync($"[自动回复]绝对不许{patContent}");
+                    await SendResponseToWeChatAsync(_settings.AutoReplyMessages.PatMessage.Replace("{0}", patContent));
 
                     // 发送后额外等待以确保微信UI完成更新
                     await Task.Delay(3000);

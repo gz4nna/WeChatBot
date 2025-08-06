@@ -5,20 +5,13 @@ namespace WeChatBot.Console.Commands;
 
 public static partial class Command
 {
-    /// <summary>
-    /// HttpClient设置超时时间为 10 分钟,因为我本地推理速度有点慢
-    /// </summary>
-    private static readonly HttpClient HttpClient = new()
-    {
-        Timeout = TimeSpan.FromMinutes(10)
-    };
 
     /// <summary>
     /// 处理 \bot 命令
     /// </summary>
     /// <param name="commandText"></param>
     /// <returns></returns>
-    public static async Task<string?> HandleBotCommand(string commandText)
+    public static async Task<string?> HandleChatCommand(string commandText)
     {
         try
         {
@@ -42,8 +35,7 @@ public static partial class Command
     /// </summary>
     private static async Task<string> GetModelResponseAsync(string prompt)
     {
-        // 总之调用的地址在这里改
-        var apiUrl = "http://localhost:5000/v1/chat/completions";
+        var apiUrl = _settings.CommandParams.ChatParams.ApiEndpoint;
 
         var requestData = new Dictionary<string, object>
         {
