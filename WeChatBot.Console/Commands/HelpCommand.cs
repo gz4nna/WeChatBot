@@ -11,8 +11,7 @@ public static partial class Command
     /// <returns></returns>
     public static Task<string?> HandleHelpCommand(string commandText)
     {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.AppendLine("[自动回复]:");
+        StringBuilder stringBuilder = new();
         stringBuilder.AppendLine("欢迎使用 WeChatBot！以下是可用的命令列表：");
         stringBuilder.AppendLine("1. \\bot <内容> - 发送内容到大语言模型并获取回复。");
         //stringBuilder.AppendLine("2. \\weather <城市> - 获取当地天气信息。(未实装)");

@@ -6,7 +6,7 @@ namespace WeChatBot.Console;
 public partial class Program
 {
     // 命令前缀和处理器映射字典
-    private static readonly Dictionary<string, Func<string, Task<string?>>> CommandHandlers = new();
+    private static readonly Dictionary<string, Func<string, Task<string?>>> commandHandlers = new();
     private static readonly SemaphoreSlim _processingLock = new(1, 1);
 
     /// <summary>
@@ -15,10 +15,10 @@ public partial class Program
     private static void InitializeCommandHandlers()
     {
         // 注册所有命令处理器
-        CommandHandlers.Add("\\help", Command.HandleHelpCommand);
-        CommandHandlers.Add("\\bot", Command.HandleBotCommand);
-        // CommandHandlers.Add("\\weather", Command.HandleWeatherCommand);
-        CommandHandlers.Add("\\picture", Command.HandlePictureCommand);
+        commandHandlers.Add("\\help", Command.HandleHelpCommand);
+        commandHandlers.Add("\\bot", Command.HandleBotCommand);
+        // commandHandlers.Add("\\weather", Command.HandleWeatherCommand);
+        commandHandlers.Add("\\picture", Command.HandlePictureCommand);
     }
 
     /// <summary>
@@ -57,7 +57,7 @@ public partial class Program
                 if (string.IsNullOrEmpty(messageContent)) throw new Exception("消息内容为空或未找到,按照特殊消息处理");
 
                 // 查找匹配的命令处理器
-                foreach (var commandPrefix in CommandHandlers.Keys)
+                foreach (var commandPrefix in commandHandlers.Keys)
                 {
                     if (messageContent.StartsWith(commandPrefix))
                     {
@@ -66,7 +66,7 @@ public partial class Program
                         System.Console.WriteLine($"检测到{commandPrefix}命令，参数: \"{commandText}\"");
 
                         // 调用对应的处理器
-                        var response = await CommandHandlers[commandPrefix](commandText);
+                        var response = await commandHandlers[commandPrefix](commandText);
 
                         // 发送到微信
                         // 空消息微信是不会发出去的,这里可以不用判
@@ -221,7 +221,7 @@ public partial class Program
             }
 
             // 使用 Enter 方法模拟键盘输入
-            _inputEdit.Enter(response);
+            _inputEdit.Enter($"WeChatBot如是说:\n{response}");
 
             // 增加延迟模仿人类操作
             await Task.Delay(1000);

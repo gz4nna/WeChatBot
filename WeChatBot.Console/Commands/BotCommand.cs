@@ -28,7 +28,7 @@ public static partial class Command
             var response = await GetModelResponseAsync(commandText);
             System.Console.WriteLine($"模型回复: \"{response}\"");
 
-            return $"[自动回复]{response}";
+            return response;
         }
         catch (Exception ex)
         {
