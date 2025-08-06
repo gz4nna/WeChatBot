@@ -181,7 +181,24 @@ public partial class Program
         if (!File.Exists("appsettings.json"))
         {
             var defaultConfig = new BotSettings();
-            File.WriteAllText("appsettings.json", System.Text.Json.JsonSerializer.Serialize(defaultConfig, new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+
+            // 创建序列化选项，设置为保留中文字符而不是转义
+            var options = new System.Text.Json.JsonSerializerOptions
+            {
+                WriteIndented = true,
+                // 以下设置确保中文字符不会被转义为 Unicode
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.Create(System.Text.Unicode.UnicodeRanges.All)
+            };
+
+            // 要添加根节点 BotSettings否则识别不出来的话直接按照默认值进去了
+            var jsonContent = System.Text.Json.JsonSerializer.Serialize(
+                new { BotSettings = new BotSettings() },
+                options
+            );
+
+            File.WriteAllText("appsettings.json", jsonContent, System.Text.Encoding.UTF8);
+
+            System.Console.WriteLine("已创建默认配置文件 appsettings.json");
         }
 
         // 创建配置
@@ -196,15 +213,29 @@ public partial class Program
         // 注册配置
         services.AddSingleton(_configuration);
 
-        // 绑定并注册BotSettings
-        var botSettings = new BotSettings();
-        _configuration.GetSection("BotSettings").Bind(botSettings);
+        // 前面的 BotSettings
+        var botSettings = _configuration.GetSection("BotSettings").Get<BotSettings>();
+        if (botSettings == null)
+        {
+            botSettings = new BotSettings();
+            System.Console.WriteLine("BotSettings 配置未找到，使用默认配置。");
+        }
+
+        // 集合类型默认采用添加（Add）而不是替换（Replace）的策略
+        // 所以先让 CommandsList里面是空的,然后再添加默认值
+        if (botSettings != null &&
+            botSettings.CommandParams?.HelpParams?.CommandsList != null &&
+            botSettings.CommandParams.HelpParams.CommandsList.Count == 0)
+        {
+            botSettings.CommandParams.HelpParams.ResetToDefaults();
+        }
+
         services.AddSingleton(botSettings);
 
         // 创建服务提供者
         _serviceProvider = services.BuildServiceProvider();
 
-        // 拿来自己用
+        // 先拿来自己用
         _settings = _serviceProvider.GetRequiredService<BotSettings>();
     }
 

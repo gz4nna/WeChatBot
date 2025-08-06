@@ -101,7 +101,6 @@ public partial class Program
                     return;
                 }
 
-
                 // "拍一拍"功能的处理
                 // "拍一拍"的 secondChild是没有 name内容的,可以一直往下看
                 var PatMessage = secondChild?.FindFirstChild()?.FindFirstChild();
@@ -207,8 +206,8 @@ public partial class Program
                 return;
             }
 
-            // response过长,需要按照1000字进行截断处理,分批发送,避免微信将多余内容舍弃
-            const int maxLength = 1000;
+            // 如果response过长,需要进行截断处理,分批发送,避免微信将多余内容舍弃
+            int maxLength = _settings.MessageSettings.MaxMessageLength;
             if (response.Length > maxLength)
             {
                 var parts = new List<string>();
@@ -227,7 +226,7 @@ public partial class Program
             _inputEdit.Enter($"WeChatBot如是说:\n{response}");
 
             // 增加延迟模仿人类操作
-            await Task.Delay(1000);
+            await Task.Delay(_settings.MessageSettings.MessageDelay);
 
             // 聚焦输入框并发送消息
             _inputEdit.Focus();

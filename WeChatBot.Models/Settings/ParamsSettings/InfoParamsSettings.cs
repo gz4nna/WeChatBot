@@ -2,5 +2,5 @@
 
 public class InfoParamsSettings
 {
-    public string InfoMessage { get; set; } = "我是WeChatBot";
+    public string InfoMessage { get; set; } = "";
 }

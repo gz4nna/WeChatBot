@@ -5,5 +5,5 @@
 /// </summary>
 public class PictureParamsSettings
 {
-    public string DefaultImagePath { get; set; } = string.Empty;
+    public string? DefaultImagePath { get; set; } = null;
 }
