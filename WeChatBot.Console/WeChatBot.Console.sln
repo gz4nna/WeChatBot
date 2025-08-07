@@ -5,6 +5,8 @@ VisualStudioVersion = 17.14.36301.6
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeChatBot.Console", "WeChatBot.Console.csproj", "{BE95ED83-382C-4636-A972-F6AAE140CB3F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeChatBot.Models", "..\WeChatBot.Models\WeChatBot.Models.csproj", "{34292643-03F8-4C8F-A7FD-3DF8F7AFBEB8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{BE95ED83-382C-4636-A972-F6AAE140CB3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE95ED83-382C-4636-A972-F6AAE140CB3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE95ED83-382C-4636-A972-F6AAE140CB3F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34292643-03F8-4C8F-A7FD-3DF8F7AFBEB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34292643-03F8-4C8F-A7FD-3DF8F7AFBEB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34292643-03F8-4C8F-A7FD-3DF8F7AFBEB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34292643-03F8-4C8F-A7FD-3DF8F7AFBEB8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

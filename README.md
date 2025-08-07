@@ -12,24 +12,30 @@
 
 ![\\help_1](https://github.com/gz4nna/WeChatBot/blob/master/WeChatBot.Example/help_1.png?raw=true)
 
-- `\bot` 模型对话功能:会将消息转发给模型,接收到模型的返回后输入并发送
+- `\chat` 模型对话功能:会将消息转发给模型,接收到模型的返回后输入并发送
 
-![\\bot_1](https://github.com/gz4nna/WeChatBot/blob/master/WeChatBot.Example/bot_1.png?raw=true)
+![\\chat_1](https://github.com/gz4nna/WeChatBot/blob/master/WeChatBot.Example/chat_1.png?raw=true)
 
 - `\picture` 发送随机图片,需要自备图库(目前未支持网络图库,使用的是文件夹)
 
 ![\\picture_1](https://github.com/gz4nna/WeChatBot/blob/master/WeChatBot.Example/picture_1.png?raw=true)
 
+- `\info` 查看机器人的其他信息
+
+![\\info_1](https://github.com/gz4nna/WeChatBot/blob/master/WeChatBot.Example/info_1.png?raw=true)
+
 ## 其他功能
 
 ### "拍一拍"自动响应
 
-当出现"拍一拍"消息的时候,会识别到"拍一拍"触发的用户自定义文本,比如在`我拍了拍自己说你好`这句中,就可以将"说你好"这个内容读出来放在变量`patContent`中
+当出现"拍一拍"消息的时候,会识别到"拍一拍"触发的用户自定义文本,比如在`我拍了拍自己说你好`这句中,就可以将"说你好"这个内容读出来
 
-处理在`WeChatBot.Console.Program.ProcessNewMessageAsync`方法里,可以自己修改回复的文本:
+在配置文件`appsettings.json`中,对回复文本的默认值为`PatMessage`的内容,其中`{0}`就代表读出的信息,也就是上文提到的"说你好",可以直接修改这部分内容以自定义文本
 
-```csharp
-await SendResponseToWeChatAsync($"[自动回复]绝对不许{patContent}");
+```json
+"AutoReplyMessages": {
+  "PatMessage": "拍了拍你{0}"
+}
 ```
 
 ### "撤回"自动响应
@@ -46,11 +52,10 @@ await SendResponseToWeChatAsync($"[自动回复]绝对不许{patContent}");
 
 ### 模型对话功能
 
-使用模型对话会调用`Commands/BotCommand.cs`文件中的`GetModelResponseAsync`方法,直接根据需要把`apiUrl`换成你的地址以及`requestData`改成你想要传的内容就好(~~现在就是直接变量写死,有朝一日会改成配置的~~)
+使用模型对话会调用`Commands/BotCommand.cs`文件中的`GetModelResponseAsync`方法,其中`requestData`可以直接改成你需要的内容
 
 ```csharp
-// 总之调用的地址在这里改
-var apiUrl = "http://localhost:5000/v1/chat/completions";
+var apiUrl = _settings.CommandParams.ChatParams.ApiEndpoint;
 
 var requestData = new Dictionary<string, object>
 {
@@ -66,11 +71,20 @@ var requestData = new Dictionary<string, object>
 };
 ```
 
+而提供API服务的地址可以在`appsettings.json`中修改`ApiEndpoint`的值
+
+```json
+"ChatParams": {
+  "ApiEndpoint": "",
+  "ApiTimeoutMinutes": 10
+},
+```
+
 ### 添加新指令
 
 1. 首先在`WeChatBot.Console/Commands`下新建一个类,最好和其他几个文件一样写成`partial class Command`
 
-2. 然后去`Program.Core.cs`文件中的`InitializeCommandHandlers`方法里添加新指令和触发的方法.如果前一步你的类是新加的,这里需要确实引用到
+2. 然后去`Program.Core.cs`文件中的`InitializeCommandHandlers`方法里添加新指令和触发的方法(~~最好在Settings里面增加新指令和需要用到的一些配置内容,当然直接写字符串也是可以的~~).如果前一步你的类是新加的,这里需要确实引用到
 
 3. 最后,如果你的逻辑并不是单纯返回一个字符串,那么可以和我的`\picture`指令一样,通过添加特殊的标记,并在`SendResponseToWeChatAsync`中进行特判来执行你需要的其他动作
 
@@ -82,4 +96,5 @@ var requestData = new Dictionary<string, object>
 
 ## 其他
 
-`\picture`演示时候用的猫是网图,侵删
+- 第一次运行会创建一个配置文件`appsettings.json`并写入默认值
+- `\picture`演示时候用的猫是网图,侵删

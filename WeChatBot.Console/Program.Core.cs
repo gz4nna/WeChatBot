@@ -1,13 +1,15 @@
 ﻿using WeChatBot.Console.Commands;
 using WeChatBot.Console.Helpers;
+using WeChatBot.Models.Settings;
 
 namespace WeChatBot.Console;
 
 public partial class Program
 {
     // 命令前缀和处理器映射字典
-    private static readonly Dictionary<string, Func<string, Task<string?>>> CommandHandlers = new();
+    private static readonly Dictionary<string, Func<string, Task<string?>>> commandHandlers = new();
     private static readonly SemaphoreSlim _processingLock = new(1, 1);
+    private static BotSettings? _settings;
 
     /// <summary>
     /// 初始化命令处理器
@@ -15,10 +17,10 @@ public partial class Program
     private static void InitializeCommandHandlers()
     {
         // 注册所有命令处理器
-        CommandHandlers.Add("\\help", Command.HandleHelpCommand);
-        CommandHandlers.Add("\\bot", Command.HandleBotCommand);
-        // CommandHandlers.Add("\\weather", Command.HandleWeatherCommand);
-        CommandHandlers.Add("\\picture", Command.HandlePictureCommand);
+        commandHandlers.Add(_settings.CommandPrefixes.Help, Command.HandleHelpCommand);
+        commandHandlers.Add(_settings.CommandPrefixes.Chat, Command.HandleChatCommand);
+        commandHandlers.Add(_settings.CommandPrefixes.Picture, Command.HandlePictureCommand);
+        commandHandlers.Add(_settings.CommandPrefixes.Info, Command.HandleInfoCommand);
     }
 
     /// <summary>
@@ -57,7 +59,7 @@ public partial class Program
                 if (string.IsNullOrEmpty(messageContent)) throw new Exception("消息内容为空或未找到,按照特殊消息处理");
 
                 // 查找匹配的命令处理器
-                foreach (var commandPrefix in CommandHandlers.Keys)
+                foreach (var commandPrefix in commandHandlers.Keys)
                 {
                     if (messageContent.StartsWith(commandPrefix))
                     {
@@ -66,7 +68,7 @@ public partial class Program
                         System.Console.WriteLine($"检测到{commandPrefix}命令，参数: \"{commandText}\"");
 
                         // 调用对应的处理器
-                        var response = await CommandHandlers[commandPrefix](commandText);
+                        var response = await commandHandlers[commandPrefix](commandText);
 
                         // 发送到微信
                         // 空消息微信是不会发出去的,这里可以不用判
@@ -78,7 +80,7 @@ public partial class Program
 
                 System.Console.WriteLine("不需要处理\n");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // 无论什么消息都有一个子元素,三个孙元素
                 var specialMessage = lastMessage?.FindFirstChild();
@@ -94,10 +96,10 @@ public partial class Program
                 if (firstChild == null && secondChild == null && thirdChild == null)
                 {
                     System.Console.WriteLine("检测到撤回消息");
-                    await SendResponseToWeChatAsync("[自动回复]大胆!撤回了什么,让我看看");
+                    await SendResponseToWeChatAsync(_settings.AutoReplyMessages.RecallMessage);
+
                     return;
                 }
-
 
                 // "拍一拍"功能的处理
                 // "拍一拍"的 secondChild是没有 name内容的,可以一直往下看
@@ -147,7 +149,7 @@ public partial class Program
 
                     // 发送回复时使用更长的延迟
                     await Task.Delay(2000); // 增加到2秒
-                    await SendResponseToWeChatAsync($"[自动回复]绝对不许{patContent}");
+                    await SendResponseToWeChatAsync(_settings.AutoReplyMessages.PatMessage.Replace("{0}", patContent));
 
                     // 发送后额外等待以确保微信UI完成更新
                     await Task.Delay(3000);
@@ -204,8 +206,8 @@ public partial class Program
                 return;
             }
 
-            // response过长,需要按照1000字进行截断处理,分批发送,避免微信将多余内容舍弃
-            const int maxLength = 1000;
+            // 如果response过长,需要进行截断处理,分批发送,避免微信将多余内容舍弃
+            int maxLength = _settings.MessageSettings.MaxMessageLength;
             if (response.Length > maxLength)
             {
                 var parts = new List<string>();
@@ -221,10 +223,10 @@ public partial class Program
             }
 
             // 使用 Enter 方法模拟键盘输入
-            _inputEdit.Enter(response);
+            _inputEdit.Enter($"WeChatBot如是说:\n{response}");
 
             // 增加延迟模仿人类操作
-            await Task.Delay(1000);
+            await Task.Delay(_settings.MessageSettings.MessageDelay);
 
             // 聚焦输入框并发送消息
             _inputEdit.Focus();
