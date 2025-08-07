@@ -8,5 +8,5 @@ public class InfoParamsSettings
     /// <summary>
     /// info 命令的回复信息
     /// </summary>
-    public string InfoMessage { get; set; } = "";
+    public string InfoMessage { get; set; } = "WeChatBot By GZ4nna";
 }

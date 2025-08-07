@@ -11,9 +11,10 @@ public class HelpParamsSettings
     public void ResetToDefaults()
     {
         CommandsList = [
-            "\\chat  <内容> - 发送内容到大语言模型并获取回复。",
-            "\\picture - 发送图库中随机图片到聊天。",
-            "\\info - 显示机器人信息"
+            "1. \\help - 获取帮助。",
+            "2. \\chat <内容> - 发送内容到大语言模型并获取回复。",
+            "3. \\picture - 发送图库中随机图片到聊天。",
+            "4. \\info - 显示机器人信息"
         ];
     }
 }
