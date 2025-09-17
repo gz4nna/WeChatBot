@@ -1,4 +1,10 @@
-﻿using FlaUI.Core;
+﻿using System.Drawing;
+using System.Runtime.InteropServices;
+
+using Emgu.CV;
+using Emgu.CV.Structure;
+
+using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Conditions;
 using FlaUI.UIA3;
@@ -6,13 +12,21 @@ using FlaUI.UIA3;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+using WeChatBot.Models;
 using WeChatBot.Models.Settings;
 
 namespace WeChatBot.Console;
 
+
 public partial class Program
 {
+    /// <summary>
+    /// 配置对象
+    /// </summary>
     private static IConfiguration? _configuration;
+    /// <summary>
+    /// 服务提供者
+    /// </summary>
     private static IServiceProvider? _serviceProvider;
     /// <summary>
     /// 计时器，用于防抖处理
@@ -25,6 +39,11 @@ public partial class Program
     private static ConditionFactory? _conditionFactory;
     private static AutomationElement? _contentAreaPane;
 
+    // 默认使用的微信客户端版本
+    private static WeChatClientVersion? _wechatClientVersion = null;
+    // 定义GetDpiForWindow函数
+    [DllImport("user32.dll")]
+    private static extern uint GetDpiForWindow(IntPtr hwnd);
 
     static async Task Main(string[] _)
     {
@@ -33,15 +52,31 @@ public partial class Program
 
         System.Console.WriteLine("正在查找微信进程...");
 
-        // 按照进程名获取微信进程
-        var processes = System.Diagnostics.Process.GetProcessesByName("WeChat");
+        System.Diagnostics.Process[]? processes = null;
+        // 定义微信进程名数组，包含3.x和4.x版本的进程名
+        string[] WeChatProcessName = ["WeChat", "weixin"];
+        uint dpi = 96;
 
-        if (processes.Length == 0)
+        // 遍历微信版本，尝试找到对应的进程, 现在只支持3和4
+        for (int v = 3; v <= 4; v++)
+        {
+            // 按照进程名获取微信进程
+            processes = System.Diagnostics.Process.GetProcessesByName(WeChatProcessName[v - 3]);
+            // 如果找到了对应版本的微信进程，则设置版本号
+            if (processes.Length != 0)
+            {
+                _wechatClientVersion = (v == 3) ? WeChatClientVersion.WeChat3_x_x : WeChatClientVersion.WeChat4_x_x;
+            }
+        }
+
+        // 如果没有找到任何微信进程，提示用户启动微信
+        if (_wechatClientVersion is null)
         {
             System.Console.WriteLine("未找到微信进程，请确保微信已启动。");
             return;
         }
-        System.Console.WriteLine($"找到 {processes.Length} 个微信进程。");
+
+        System.Console.WriteLine($"找到 {processes.Length} 个微信进程;当前微信大版本编号为 {_wechatClientVersion}");
 
         Application? app = null;
         Window? mainWindow = null;
@@ -49,6 +84,7 @@ public partial class Program
         using var automation = new UIA3Automation();
 
         // 遍历进程，找到拥有正确主窗口的那个
+        // 这段不管是哪个版本的微信都是一样的
         foreach (var process in processes)
         {
             if (process.MainWindowHandle == IntPtr.Zero) continue;
@@ -67,6 +103,10 @@ public partial class Program
                 {
                     mainWindow = window;
                     System.Console.WriteLine("成功获取微信主窗口。");
+                    // 立刻获取窗口句柄
+                    IntPtr wechatHwnd = window.Properties.NativeWindowHandle.Value;
+                    // 获取该窗口所在的显示器的DPI
+                    dpi = GetDpiForWindow(wechatHwnd);
                     break;
                 }
             }
@@ -75,6 +115,44 @@ public partial class Program
                 System.Console.WriteLine($"附加到进程 PID: {process.Id} 失败: {ex.Message}");
             }
         }
+
+        // 4.0版本正在测试
+        if (_wechatClientVersion == WeChatClientVersion.WeChat4_x_x)
+        {
+            // 获取主窗口的边界矩形
+            var bounds = mainWindow?.BoundingRectangle;
+            // 计算缩放倍率,原始dpi是96
+            float scaleFactor = dpi / 96.0f;
+            // 根据缩放倍率调整边界矩形
+            bounds = new Rectangle(
+                (int)(bounds.Value.Left * scaleFactor),
+                (int)(bounds.Value.Top * scaleFactor),
+                (int)(bounds.Value.Width * scaleFactor),
+                (int)(bounds.Value.Height * scaleFactor)
+            );
+
+            // 创建一个bitmap对象，大小与窗口相同
+            Bitmap screenshot = new Bitmap((int)bounds?.Width, (int)bounds?.Height);
+            // 使用Graphics从屏幕捕获图像
+            using (Graphics g = Graphics.FromImage(screenshot))
+            {
+                g.CopyFromScreen(
+                    new Point(bounds.Value.Left, bounds.Value.Top),
+                    Point.Empty,
+                    bounds.Value.Size
+                );
+            }
+            // 保存到桌面
+            screenshot.Save(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "WeChatMainWindow.png"));
+            // 加载"./TemplateImages/sendMassageButtonImage.png"这张模板图片
+            var template = new Image<Bgr, byte>(Path.Combine("TemplateImages", "sendMassageButtonImage.png"));
+            // 进行模板匹配
+
+            // 4.0版本还在测试,先不继续执行了
+            return;
+        }
+
+        // 3.0版本使用uia执行,直接走下去就好了
 
         if (mainWindow == null)
         {
@@ -175,6 +253,9 @@ public partial class Program
         return _contentAreaPane != null && _inputEdit != null;
     }
 
+    /// <summary>
+    /// 配置服务
+    /// </summary>
     private static void ConfigureServices()
     {
         // 如果不存在 appsettings.json,创建一个并将默认配置写入

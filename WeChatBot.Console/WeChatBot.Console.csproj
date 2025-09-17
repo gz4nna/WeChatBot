@@ -5,10 +5,13 @@
     <TargetFramework>net8.0-windows10.0.22000.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AlibabaCloud.SDK.Dingtalk" Version="2.2.27" />
+    <PackageReference Include="Emgu.CV" Version="4.9.0.5494" />
+    <PackageReference Include="Emgu.CV.Bitmap" Version="4.9.0.5494" />
+    <PackageReference Include="Emgu.CV.runtime.windows" Version="4.9.0.5494" />
     <PackageReference Include="FlaUI.Core" Version="5.0.0" />
     <PackageReference Include="FlaUI.UIA3" Version="5.0.0" />
     <PackageReference Include="Interop.UIAutomationClient" Version="10.19041.0" />
@@ -21,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\WeChatBot.Models\WeChatBot.Models.csproj" />
+    <ProjectReference Include="..\WeChatBot.Templates\WeChatBot.Templates.csproj" />
   </ItemGroup>
 
   <ItemGroup>
