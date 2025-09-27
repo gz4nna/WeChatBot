@@ -7,6 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Update="TemplateImages\sendEmojiButtonImage.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="TemplateImages\sendMassageButtonImage.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

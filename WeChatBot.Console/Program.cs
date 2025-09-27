@@ -2,9 +2,9 @@
 using System.Runtime.InteropServices;
 
 using Emgu.CV;
+using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 
-using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Conditions;
 using FlaUI.UIA3;
@@ -14,6 +14,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 using WeChatBot.Models;
 using WeChatBot.Models.Settings;
+
+using Application = FlaUI.Core.Application;
 
 namespace WeChatBot.Console;
 
@@ -57,7 +59,7 @@ public partial class Program
         string[] WeChatProcessName = ["WeChat", "weixin"];
         uint dpi = 96;
 
-        // 遍历微信版本，尝试找到对应的进程, 现在只支持3和4
+        // 遍历微信版本，尝试找到对应的进程, 现在只支持3和4)
         for (int v = 3; v <= 4; v++)
         {
             // 按照进程名获取微信进程
@@ -144,10 +146,41 @@ public partial class Program
             }
             // 保存到桌面
             screenshot.Save(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "WeChatMainWindow.png"));
-            // 加载"./TemplateImages/sendMassageButtonImage.png"这张模板图片
-            var template = new Image<Bgr, byte>(Path.Combine("TemplateImages", "sendMassageButtonImage.png"));
+            // 加载"./TemplateImages/sendEmojiButtonImage.png"这张模板图片,这张图片是发送表情按钮的截图
+            Bitmap templateImage = (Bitmap)Image.FromFile("./TemplateImages/sendEmojiButtonImage.png");
             // 进行模板匹配
+            double threshold = 0.85; // 相似度阈值
+            Rectangle? matchRect = FindTemplateMatch(screenshot, templateImage, threshold);
 
+            if (matchRect != null)
+            {
+                // 计算目标控件的物理像素中心点
+                Point targetPhysicalPoint = new Point(
+                    matchRect.Value.X + matchRect.Value.Width / 2,
+                    matchRect.Value.Y + matchRect.Value.Height / 2
+                );
+
+                // 将物理像素点转换为屏幕绝对坐标
+                // 直接相加使用的是屏幕空间的坐标,但是模拟需要的是原始坐标
+                Point screenPoint = new Point(
+                    (int)((bounds.Value.X + targetPhysicalPoint.X) / scaleFactor),
+                    (int)((bounds.Value.Y + targetPhysicalPoint.Y) / scaleFactor)
+                );
+
+                System.Console.WriteLine($"成功找到按钮，屏幕坐标为: ({screenPoint.X}, {screenPoint.Y})");
+
+                // 6. 模拟鼠标点击
+                System.Windows.Forms.Cursor.Position = screenPoint; // 移动鼠标
+
+                // 接下来可以调用模拟点击的方法，比如 SendInput
+                System.Threading.Thread.Sleep(50);
+                MouseSimulator.DoLeftClick();
+                System.Threading.Thread.Sleep(50);
+            }
+            else
+            {
+                System.Console.WriteLine("未找到目标按钮，请检查模板图片或调整阈值。");
+            }
             // 4.0版本还在测试,先不继续执行了
             return;
         }
@@ -324,5 +357,52 @@ public partial class Program
     public static T GetService<T>() where T : class
     {
         return _serviceProvider!.GetRequiredService<T>();
+    }
+
+    /// <summary>
+    /// 在大图中查找模板图片的位置
+    /// </summary>
+    /// <param name="sourceImage">微信主窗口的截图</param>
+    /// <param name="templateImage">要查找的模板图片</param>
+    /// <param name="threshold">匹配相似度阈值，0到1之间，例如0.85</param>
+    /// <returns>如果找到，返回匹配的矩形区域；否则返回null</returns>
+    public static Rectangle? FindTemplateMatch(Bitmap sourceImage, Bitmap templateImage, double threshold)
+    {
+        // 确保图片不为空
+        if (sourceImage == null || templateImage == null)
+        {
+            System.Console.WriteLine("源图片或模板图片为空。");
+            return null;
+        }
+
+        // 将Bitmap对象转换为Emgu CV的Image对象
+        // 使用using块确保资源被正确释放
+        using var source = sourceImage.ToImage<Bgr, byte>();
+        using var template = templateImage.ToImage<Bgr, byte>();
+
+        // 创建一个结果图像，用于存储匹配结果
+        using var result = new Image<Gray, float>(source.Width - template.Width + 1, source.Height - template.Height + 1);
+
+        // 执行模板匹配
+        // TemplateMatchingType.CcorrNormed 是最常用的方法，结果值在0到1之间，1表示完全匹配
+        CvInvoke.MatchTemplate(source, template, result, TemplateMatchingType.CcorrNormed);
+
+        // 寻找匹配度最高的点
+        double minVal = 0, maxVal = 0;
+        Point minLoc = Point.Empty, maxLoc = Point.Empty;
+        CvInvoke.MinMaxLoc(result, ref minVal, ref maxVal, ref minLoc, ref maxLoc);
+
+        // 如果最大匹配值超过设定的阈值，则认为找到匹配
+        if (maxVal >= threshold)
+        {
+            // 匹配点是模板左上角的坐标，所以需要构建一个矩形
+            Rectangle matchRect = new Rectangle(maxLoc, template.Size);
+            return matchRect;
+        }
+        else
+        {
+            System.Console.WriteLine($"未找到匹配，最高相似度为：{maxVal}");
+            return null;
+        }
     }
 }
